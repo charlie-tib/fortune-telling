@@ -14,14 +14,15 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@vercel/node": "^3.0.7",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "wrangler": "^3.78.0"
   }
 }

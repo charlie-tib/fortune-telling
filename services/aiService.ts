@@ -2,7 +2,7 @@ import { DivinationResult } from "../types";
 
 export const interpretGua = async (result: DivinationResult): Promise<string> => {
   try {
-    // 使用 Vercel Serverless Function 作为代理，解决国内访问问题
+    // 使用 Cloudflare Pages Functions 作为代理，解决国内访问问题
     const response = await fetch("/api/interpret", {
       method: "POST",
       headers: {
