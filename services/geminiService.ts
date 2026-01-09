@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { DivinationResult } from "../types";
 
-// 声明 process 变量以通过 TypeScript 编译检查
 declare const process: {
   env: {
     API_KEY: string;
@@ -11,10 +10,10 @@ declare const process: {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const interpretGua = async (result: DivinationResult): Promise<string> => {
-  // 检查 API KEY 是否配置
   const apiKey = process.env.API_KEY;
-  if (!apiKey || apiKey === 'undefined') {
-    return "【天机未启】检测到系统尚未配置 API Key。请在 Vercel 后台的 Environment Variables 中添加 API_KEY 变量，然后重新部署。";
+  
+  if (!apiKey || apiKey === 'undefined' || apiKey === '') {
+    return "【天机未启】系统尚未配置 API Key。\n\n请在 Vercel 控制台的 Settings -> Environment Variables 中添加 API_KEY，然后重新部署。";
   }
 
   const prompt = `
@@ -48,15 +47,23 @@ export const interpretGua = async (result: DivinationResult): Promise<string> =>
         contents: prompt,
       });
 
-      const text = response.text;
-      if (text) return text;
-      throw new Error("Empty response");
+      if (response && response.text) {
+        return response.text;
+      }
+      throw new Error("Empty response from AI");
     } catch (error: any) {
       lastError = error;
+      const errorMsg = error?.message || "";
+      
+      // 专门处理 429 错误
+      if (errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
+        return "【天机受限】当前的 AI 服务配额已耗尽（Error 429）。\n\n这通常是因为：\n1. 您的 Gemini API Key 余额不足或未开启付费。\n2. 免费额度请求过于频繁。\n\n建议：请前往 Google AI Studio (aistudio.google.com) 检查您的 API 使用状态及账单设置。";
+      }
+
       console.warn(`第 ${attempt + 1} 次尝试失败:`, error);
       if (attempt < MAX_RETRIES - 1) await sleep(2000);
     }
   }
 
-  return `【大师闭关中】暂时无法连接星宿。原因：${lastError?.message || '未知错误'}。请稍后再试。`;
+  return `【大师闭关中】暂时无法连接星宿。原因：${lastError?.message || '未知连接错误'}。请稍后再试。`;
 };
