@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Calendar, Hash, Loader2, RotateCcw, BookOpen, HelpCircle, Info, Search, Share, PlusSquare, X } from 'lucide-react';
 import { DivinationResult, DivinationMethod } from './types';
 import { calculateByTime, calculateByNumbers } from './services/divinationEngine';
-import { interpretGua } from './services/geminiService';
+import { interpretGua } from './services/aiService';
 import HexagramView from './components/HexagramView';
 import HexagramLookup from './components/HexagramLookup';
 
