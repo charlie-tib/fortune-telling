@@ -36,34 +36,31 @@ export const interpretGua = async (result: DivinationResult): Promise<string> =>
     请用 Markdown 格式输出。
   `;
 
-  const MAX_RETRIES = 2;
+  const MAX_RETRIES = 1;
   let lastError: any = null;
 
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-      });
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    // 使用 gemini-2.0-flash 以获得更稳定的免费配额支持
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
 
-      if (response && response.text) {
-        return response.text;
-      }
-      throw new Error("Empty response from AI");
-    } catch (error: any) {
-      lastError = error;
-      const errorMsg = error?.message || "";
-      
-      // 专门处理 429 错误
-      if (errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
-        return "【天机受限】当前的 AI 服务配额已耗尽（Error 429）。\n\n这通常是因为：\n1. 您的 Gemini API Key 余额不足或未开启付费。\n2. 免费额度请求过于频繁。\n\n建议：请前往 Google AI Studio (aistudio.google.com) 检查您的 API 使用状态及账单设置。";
-      }
-
-      console.warn(`第 ${attempt + 1} 次尝试失败:`, error);
-      if (attempt < MAX_RETRIES - 1) await sleep(2000);
+    if (response && response.text) {
+      return response.text;
     }
-  }
+    throw new Error("Empty response from AI");
+  } catch (error: any) {
+    lastError = error;
+    const errorMsg = error?.message || "";
+    
+    // 专门处理 429 错误
+    if (errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED")) {
+      return "【天机受限】当前的 AI 服务免费额度已耗尽 (Error 429)。\n\n**可能的原因：**\n1. 您的 Gemini 免费版每日请求数已达上限（通常是每天 1500 次）。\n2. 您的请求频率过高（每分钟超过 15 次）。\n\n**解决方法：**\n- 请耐心等待几分钟后再试。\n- 或者前往 [Google AI Studio](https://aistudio.google.com/) 检查您的 API Key 状态。\n- 确保您的 API Key 对应的项目已开启额度（即使是免费层级也需要确认）。";
+    }
 
-  return `【大师闭关中】暂时无法连接星宿。原因：${lastError?.message || '未知连接错误'}。请稍后再试。`;
+    console.warn("AI 接口调用失败:", error);
+    return `【大师闭关中】暂时无法连接星宿。\n\n原因：${lastError?.message || '未知连接错误'}。\n建议：请检查网络或稍后重试。`;
+  }
 };
