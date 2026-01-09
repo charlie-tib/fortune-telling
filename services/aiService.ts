@@ -10,7 +10,7 @@ export const interpretGua = async (result: DivinationResult): Promise<string> =>
   const apiKey = process.env.API_KEY;
   
   if (!apiKey || apiKey === 'undefined' || apiKey === '') {
-    return "【系统提示】尚未配置 API Key。请在环境变量中设置 API_KEY。";
+    return "【天机未设】尚未检测到有效 API Key。\n\n请在环境变量中设置 API_KEY（DeepSeek 的 Key 通常以 sk- 开头）。";
   }
 
   const prompt = `
@@ -34,7 +34,9 @@ export const interpretGua = async (result: DivinationResult): Promise<string> =>
   `;
 
   try {
-    // 调用 DeepSeek 官方 API 接口
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
@@ -49,18 +51,32 @@ export const interpretGua = async (result: DivinationResult): Promise<string> =>
         ],
         temperature: 0.7,
         max_tokens: 2048
-      })
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `HTTP 错误！状态码: ${response.status}`);
+      const msg = errorData.error?.message || `HTTP ${response.status}`;
+      
+      if (response.status === 401) {
+        throw new Error("API Key 无效。请确认您填写的是 DeepSeek 的 sk- 密钥。");
+      }
+      if (response.status === 429) {
+        throw new Error("DeepSeek 账户余额不足或请求过快，请检查账户。");
+      }
+      throw new Error(msg);
     }
 
     const data = await response.json();
     return data.choices[0].message.content;
   } catch (error: any) {
-    console.error("AI API 调用失败:", error);
-    return `【大师闭关中】暂时无法通过 AI 获取天机。\n\n错误原因：${error.message}\n建议：请确认您的 API Key 是正确的 DeepSeek Key（通常以 sk- 开头），并检查网络连接。`;
+    console.error("AI 接口调用异常:", error);
+    if (error.name === 'AbortError') {
+      return "【天机迟缓】AI 响应超时，可能是网络不佳或大师正在深度推演，请稍后再试。";
+    }
+    return `【大师闭关】暂时无法获取天机。\n\n**原因：** ${error.message}\n**建议：** 请确认环境变量 API_KEY 为 DeepSeek 的密钥（以 sk- 开头），并检查账户余额。`;
   }
 };
