@@ -1,16 +1,11 @@
-// Cloudflare Pages Functions - 使用 Cloudflare Workers 运行时
-import type { PagesFunctionContext } from '../types';
+// Cloudflare Pages Functions
+// 参考: https://developers.cloudflare.com/pages/platform/functions/
 
-export const onRequestPost = async (context: PagesFunctionContext) => {
+export async function onRequestPost(context: {
+  request: Request;
+  env: { API_KEY?: string };
+}): Promise<Response> {
   const { request, env } = context;
-  
-  // 只允许 POST 请求
-  if (request.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  }
 
   const apiKey = env.API_KEY;
   if (!apiKey) {
@@ -88,10 +83,13 @@ export const onRequestPost = async (context: PagesFunctionContext) => {
       headers: { 'Content-Type': 'application/json' }
     });
   }
-};
+}
 
 // 处理 OPTIONS 请求（CORS 预检）
-export const onRequestOptions = async (_context: PagesFunctionContext) => {
+export async function onRequestOptions(context: {
+  request: Request;
+  env: { API_KEY?: string };
+}): Promise<Response> {
   return new Response(null, {
     status: 204,
     headers: {
@@ -101,4 +99,4 @@ export const onRequestOptions = async (_context: PagesFunctionContext) => {
       'Access-Control-Max-Age': '86400',
     },
   });
-};
+}
