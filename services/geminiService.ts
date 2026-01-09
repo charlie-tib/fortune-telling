@@ -1,6 +1,12 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { DivinationResult } from "../types";
+
+// 声明 process 变量以通过 TypeScript 编译检查
+declare const process: {
+  env: {
+    API_KEY: string;
+  };
+};
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
