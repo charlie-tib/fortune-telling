@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --sat: env(safe-area-inset-top);
+    --sar: env(safe-area-inset-right);
+    --sab: env(safe-area-inset-bottom);
+    --sal: env(safe-area-inset-left);
+}
+
+body {
+    /* 国内友好字体栈：优先使用系统宋体 */
+    font-family: "STSong", "Songti SC", "Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "SimSun", serif;
+    background-color: #0f172a;
+    color: #f8fafc;
+    overscroll-behavior-y: none;
+    padding: var(--sat) var(--sar) var(--sab) var(--sal);
+    min-height: 100vh;
+}
+
+.mystic-gradient {
+    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+    min-height: 100vh;
+}
+
+.gua-line-yang {
+    height: 12px;
+    background-color: #fbbf24;
+    width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.gua-line-yin {
+    height: 12px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.gua-line-yin div {
+    height: 100%;
+    width: 44%;
+    background-color: #fbbf24;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+}
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
