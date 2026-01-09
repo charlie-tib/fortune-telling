@@ -1,67 +1,37 @@
 import { DivinationResult } from "../types";
 
-declare const process: {
-  env: {
-    API_KEY: string;
-  };
-};
-
 export const interpretGua = async (result: DivinationResult): Promise<string> => {
   const apiKey = process.env.API_KEY;
-  
-  if (!apiKey || apiKey === 'undefined' || apiKey === '') {
-    return "【系统提示】尚未配置 API Key。请在环境变量中设置 DeepSeek 的 API_KEY。";
-  }
-
-  // 极简化的提示词，强制要求 AI 快速输出结论
-  const prompt = `
-    你是一位解卦大师。请根据卦象快速给出结论。
-
-    问卜之事：${result.question}
-    卦象：${result.benGua.name} -> ${result.huGua.name} -> ${result.bianGua.name}
-    动爻：第${result.changingLine}爻
-
-    要求：
-    1. 直接点名吉凶。
-    2. 结合体用给出一句话核心分析。
-    3. 给出一条具体建议。
-    4. 禁止废话，禁止复述。总字数控制在100字左右。
-  `;
+  if (!apiKey) return "系统配置异常：未检测到密钥。";
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时，国内直连足够
-
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey.trim()}`
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'deepseek-chat', // 使用 V3 非思考模型，速度极快
+        model: "deepseek-chat",
         messages: [
-          { role: 'system', content: '你是一个高效的解卦助手。直接回答，不要啰嗦。' },
-          { role: 'user', content: prompt }
+          {
+            role: "system",
+            content: "你是一位精通《易经》与《梅花易数》的玄学导师。请根据卦象（本卦、互卦、变卦）及动爻，为用户解析其疑惑。语言应古典优雅且充满智慧，通过五行生克解析体用。结构：1. 卦意综述 2. 细节解析 3. 行动指引。"
+          },
+          {
+            role: "user",
+            content: `问卜：${result.question}\n本卦：${result.benGua.name}\n互卦：${result.huGua.name}\n变卦：${result.bianGua.name}\n变爻：第${result.changingLine}爻`
+          }
         ],
-        temperature: 0.5,
-        max_tokens: 300,
-        stream: false
-      }),
-      signal: controller.signal
+        stream: false,
+        temperature: 0.7
+      })
     });
 
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `状态码: ${response.status}`);
-    }
-
     const data = await response.json();
-    return data.choices[0].message.content;
+    return data.choices[0].message.content || "灵犀未通，请稍后再试。";
   } catch (error: any) {
-    if (error.name === 'AbortError') return "推演超时，请重试。";
-    return `解卦失败：${error.message}`;
+    console.error("DeepSeek API Error:", error);
+    return `链接乾坤失败：${error.message}。请确保您的网络环境支持访问 DeepSeek 接口。`;
   }
 };

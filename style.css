@@ -3,37 +3,49 @@
 @tailwind utilities;
 
 :root {
-    --sat: env(safe-area-inset-top);
-    --sar: env(safe-area-inset-right);
-    --sab: env(safe-area-inset-bottom);
-    --sal: env(safe-area-inset-left);
+    --bg-dark: #0a0a0b;
+    --card-ink: #141416;
+    --gold: #c5a059;
+    --gold-bright: #f9d976;
+    --vermilion: #a52a2a;
+    --text-main: #e5e5e5;
 }
 
 body {
-    /* 国内友好字体栈：优先使用系统宋体 */
-    font-family: "STSong", "Songti SC", "Source Han Serif SC", "Source Han Serif CN", "Noto Serif CJK SC", "SimSun", serif;
-    background-color: #0f172a;
-    color: #f8fafc;
-    overscroll-behavior-y: none;
-    padding: var(--sat) var(--sar) var(--sab) var(--sal);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "STSong", "Songti SC", serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
-.mystic-gradient {
-    background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
-    min-height: 100vh;
+/* 宣纸杂点质感 */
+.mystic-bg {
+    background-color: var(--bg-dark);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-blend-mode: overlay;
+    background-opacity: 0.05;
 }
 
+.glass-card {
+    background: var(--card-ink);
+    border: 1px solid rgba(197, 160, 89, 0.12);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* 浮雕质感阴阳爻 */
 .gua-line-yang {
-    height: 12px;
-    background-color: #fbbf24;
+    height: 14px;
+    background: linear-gradient(90deg, #8a6d3b 0%, #c5a059 50%, #8a6d3b 100%);
     width: 100%;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    border-radius: 2px;
+    box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .gua-line-yin {
-    height: 12px;
+    height: 14px;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -42,19 +54,51 @@ body {
 .gua-line-yin div {
     height: 100%;
     width: 44%;
-    background-color: #fbbf24;
+    background: linear-gradient(90deg, #8a6d3b 0%, #c5a059 50%, #8a6d3b 100%);
+    border-radius: 2px;
+    box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.1),
+        0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 变爻流光效果 */
+.moving-line {
+    position: relative;
+}
+.moving-line::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 1px solid var(--vermilion);
     border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    animation: pulse-vermilion 2s infinite;
 }
 
-* {
-    -webkit-tap-highlight-color: transparent;
+@keyframes pulse-vermilion {
+    0%, 100% { opacity: 0.3; box-shadow: 0 0 5px var(--vermilion); }
+    50% { opacity: 1; box-shadow: 0 0 15px var(--vermilion); }
 }
 
-::-webkit-scrollbar {
-    width: 4px;
+.btn-gold {
+    background: linear-gradient(135deg, #c5a059 0%, #a68545 100%);
+    color: #0a0a0b;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 10px;
+
+.btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(197, 160, 89, 0.4);
 }
+
+.tai-chi-spin {
+    animation: rotate-slow 15s linear infinite;
+}
+
+@keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 隐藏滚动条但保留功能 */
+::-webkit-scrollbar { width: 0; background: transparent; }
