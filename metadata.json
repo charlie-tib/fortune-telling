@@ -1,0 +1,5 @@
+{
+  "name": "梅花易数 - AI 灵卦",
+  "description": "基于经典《梅花易数》与 Gemini AI 的周易算卦应用。通过时间或数字起卦，由 AI 深度解析您的心中疑惑。",
+  "requestFramePermissions": []
+}
